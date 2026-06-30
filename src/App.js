@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+// eslint-disable-next-line
 const initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: true },
@@ -7,11 +8,33 @@ const initialItems = [
 ];
 
 export default function App() {
+  const [items, setItems] = useState(initialItems);
+
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
+
+  function handleDeleteItem(idToDelete) {
+    console.log("ID deleted: ", idToDelete);
+    setItems(
+      (currentItems) => currentItems.filter((item) => item.id !== idToDelete),
+      // When given an id to delete,
+      // replace the items state with a new array that contains every item except the one with that id.
+    );
+  }
+  // Define a function called handleDeleteItem that receives an idToDelete.
+  // Inside that function, update the items state.
+  // To update the items state, take the current items array.
+  // Filter the current items array.
+  // For each item in the array, keep the item only if that item’s id is not equal to idToDelete.
+  // The result of filter is a new array.
+  // Set items state equal to that new filtered array.
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={items} onDeleteItem={handleDeleteItem} />
       <Stats />
     </div>
   );
@@ -21,7 +44,7 @@ function Logo() {
   return <h1>🏝️ Far Away 🧳</h1>;
 }
 
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -32,6 +55,8 @@ function Form() {
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
     console.log(newItem);
+
+    onAddItems(newItem);
 
     setDescription("");
     setQuantity(1);
@@ -64,12 +89,16 @@ function Form() {
   );
 }
 
-function PackingList() {
+function PackingList({ items, onDeleteItem }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map((itemObj) => (
-          <Item itemProp={itemObj} key={itemObj.id} />
+        {items.map((itemObj) => (
+          <Item
+            itemProp={itemObj}
+            onDeleteItem={onDeleteItem}
+            key={itemObj.id}
+          />
         ))}
         {/* Inside the map method, each of the elements will be an itemObj. 
         For each itemObj, what we want to render is an Item component. 
@@ -89,13 +118,13 @@ function PackingList() {
   );
 }
 
-function Item({ itemProp }) {
+function Item({ itemProp, onDeleteItem }) {
   return (
     <li>
       <span style={itemProp.packed ? { textDecoration: "line-through" } : {}}>
         {itemProp.quantity} {itemProp.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(itemProp.id)}>❌</button>
     </li>
   );
 }
